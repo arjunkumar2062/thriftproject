@@ -1,0 +1,26 @@
+In the last years of the nineteenth century, Planck was investigating the problem of black-body radiation first posed by Kirchhoff some forty
+years earlier. It is well known that hot objects glow, and that hotter objects glow brighter than cooler ones. The reason is that the
+electromagnetic field obeys laws of motion just like a mass on a spring, and can come to thermal equilibrium with hot atoms. When a hot object
+is in equilibrium with light, the amount of light it absorbs is equal to the amount of light it emits. If the object is black, meaning it
+absorbs all the light that hits it, then it emits the maximum amount of thermal light too.
+The assumption that blackbody radiation is thermal leads to an accurate prediction: the total amount of emitted energy goes up with the
+temperature according to a definite rule, the Stefan–Boltzmann law (1879–84). But it was also known that the colour of the light given off by
+a hot object changes with the temperature, so that "white hot" is hotter than "red hot". Nevertheless, Wilhelm Wien discovered the
+mathematical relationship between the peaks of the curves at different temperatures, by using the principle of adiabatic invariance. At each
+different temperature, the curve is moved over by Wien's displacement law (1893). Wien also proposed an approximation for the spectrum of the
+object, which was correct at high frequencies (short wavelength) but not at low frequencies (long wavelength).[5] It still was not clear why
+the spectrum of a hot object had the form that it has (see diagram).
+Planck hypothesized that the equations of motion for light describe a set of harmonic oscillators, one for each possible frequency. He
+examined how the entropy of the oscillators varied with the temperature of the body, trying to match Wien's law, and was able to derive an
+approximate mathematical function for black-body spectrum.[6]
+However, Planck soon realized that his solution was not unique. There were several different solutions, each of which gave a different value
+for the entropy of the oscillators.[6] To save his theory, Planck had to resort to using the then controversial theory of statistical
+mechanics,[6] which he described as "an act of despair … I was ready to sacrifice any of my previous convictions about physics."[7] One of his
+new boundary conditions was
+    to interpret UN [the vibrational energy of N oscillators] not as a continuous, infinitely divisible quantity, but as a discrete quantity
+composed of an integral number of finite equal parts. Let us call each such part the energy element ε;
+    —Planck, On the Law of Distribution of Energy in the Normal Spectrum[6]
+With this new condition, Planck had imposed the quantization of the energy of the oscillators, "a purely formal assumption … actually I did
+not think much about it…" in his own words,[8] but one which would revolutionize physics. Applying this new approach to Wien's displacement
+law showed that the "energy element" must be proportional to the frequency of the oscillator, the first version of what is now sometimestermed
+the "Planck–Einstein relation":
