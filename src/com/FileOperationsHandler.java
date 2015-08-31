@@ -18,6 +18,11 @@ import org.apache.thrift.TException;
 
 
 
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+
 /**
  * @author arjun
  *
@@ -34,11 +39,18 @@ public class FileOperationsHandler implements FileOperations.Iface {
 	@Override
 	public List<String> readText(Work work) throws InvalidOperation, TException {
 		try{
-			List<String> text;
 			String filename = work.filename;
 			int numOfLines=work.numOfLines;
-			text = readLastKLines(numOfLines,filename);
-			return text;
+			work.text = readLastKLines(numOfLines,filename);
+			//writing to b.txt using serverB
+			TTransport transport;
+			transport = new TSocket("localhost", 9091);
+			transport.open();
+			TProtocol protocol = new  TBinaryProtocol(transport);
+			FileOperations.Client client = new FileOperations.Client(protocol);
+			Utility.write(client, work);
+			transport.close();
+			return work.text;
 		}
 		catch(Exception e){
 			return null;

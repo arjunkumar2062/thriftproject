@@ -28,14 +28,12 @@ public class Server {
 		private TServer server;
 	}
 	public static void main(String [] args) {
-		ThreadServerCouple A=startServer(Constants.PORTA);
-		ThreadServerCouple B=startServer(Constants.PORTB);
-		TServer serverA=A.server;
-		TServer serverB=B.server;
-		//serverA.stop();
+		TServer A=startServer(Constants.PORTA);
+		TServer B=startServer(Constants.PORTB);
+		
 	}
 
-	public static ThreadServerCouple startServer(int portNumber){
+	public static TServer startServer(int portNumber){
 		handler = new FileOperationsHandler();
 		processor = new FileOperations.Processor(handler);
 		TServerTransport serverTransport;
@@ -45,7 +43,7 @@ public class Server {
 			RunnableServer simple = new RunnableServer(server);
 			Thread serverThread = new Thread(simple);
 			serverThread.start();
-			return new ThreadServerCouple(serverThread,server);
+			return server;
 		} catch (TTransportException e) {
 			e.printStackTrace();
 			return null;

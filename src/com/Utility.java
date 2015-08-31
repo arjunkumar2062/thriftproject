@@ -46,7 +46,4 @@ public class Utility {
 
 	}
 
-	public static void instruction(FileOperations.Client client,String instruction) {
-		
-	}
 }
