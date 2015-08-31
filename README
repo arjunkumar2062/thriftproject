@@ -1,0 +1,13 @@
+Problem Statement :
+Have 2 thrift server instance running (on same machine), each having a file at
+their possession(passed as parameter).  Say a.txt and b.txt.  when a client makes a call to
+Server A, A should remove last 10 lines from a.txt and then pass it on
+to server B.  server B should prepend the incoming data to b.txt.
+
+client --------> Server A ------> Server B
+       <-----------|<----------------|
+
+also build a client to test it.
+
+
+
