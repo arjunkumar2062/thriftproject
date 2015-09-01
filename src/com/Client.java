@@ -17,6 +17,7 @@
  * under the License.
  */
 package com;
+import java.io.File;
 import java.util.List;
 
 import org.apache.thrift.TException;
@@ -34,11 +35,11 @@ public class Client {
 
 		try {
 			TTransport transport;
-			transport = new TSocket("localhost", 9090);
+			transport = new TSocket("localhost", Constants.PORTA);
 			transport.open();
 			TProtocol protocol = new  TBinaryProtocol(transport);
 			FileOperations.Client client = new FileOperations.Client(protocol);
-			List<String>text=Utility.read(client);
+			List<String>text=UtilityClient.read(client);
 			transport.close();
 		} catch (TException x) {
 			x.printStackTrace();
