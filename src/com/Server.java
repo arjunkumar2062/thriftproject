@@ -1,5 +1,6 @@
 package com;
 
+import org.apache.commons.logging.Log;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
@@ -8,6 +9,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.apache.thrift.server.TServer.Args;
 
 import fileReaderWriter.FileOperations;
+import fileReaderWriter.InvalidOperation;
 
 public class Server {
 
@@ -27,13 +29,13 @@ public class Server {
 
 		private TServer server;
 	}
-	public static void main(String [] args) {
+	public static void main(String [] args) throws InvalidOperation {
 		TServer A=startServer(Constants.PORTA);
 		TServer B=startServer(Constants.PORTB);
 		
 	}
 
-	public static TServer startServer(int portNumber){
+	public static TServer startServer(int portNumber) throws InvalidOperation{
 		handler = new FileOperationsHandler();
 		processor = new FileOperations.Processor(handler);
 		TServerTransport serverTransport;
@@ -45,8 +47,9 @@ public class Server {
 			serverThread.start();
 			return server;
 		} catch (TTransportException e) {
-			e.printStackTrace();
-			return null;
+			InvalidOperation io = new InvalidOperation();
+		    io.why = e.getMessage();
+		    throw io;
 		}
 	}
 

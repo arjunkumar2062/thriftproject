@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir src
+sudo thrift --gen java fileOperations.thrift
+mv gen-java/* ./
+rmdir gen-java
+

@@ -31,6 +31,22 @@ import org.apache.thrift.transport.TTransport;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * @author arjun
  *
@@ -64,8 +80,15 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			transport.close();
 			return work.text;
 		}
+		catch(TException e){
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
+		}
 		catch(Exception e){
-			return null;
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		
 		}
 	}
 
@@ -78,7 +101,7 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			initialize(filename);
 			//find size of text
 			int byteSize=findMemorySizeOfData(text);
-			
+
 			if(lineMemSize.get(numberOfLinesInFile)+byteSize<=Constants.THRESHOLDMEMORY){
 				File file = new File(filename);
 				if (!file.exists()) {
@@ -123,8 +146,13 @@ public class FileOperationsHandler implements FileOperations.Iface {
 
 
 		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		}
+		catch(Exception e){
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		}
 		return false;
 
 	}
@@ -138,7 +166,7 @@ public class FileOperationsHandler implements FileOperations.Iface {
 	}
 
 
-	private static void initialize(String filename){
+	private static void initialize(String filename) throws InvalidOperation{
 		System.out.println("Computing number of lines first time");
 		String sCurrentLine;
 		int numOfBytes=0;
@@ -158,18 +186,24 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			numberOfLinesInFile=numOfLinesInFile;
 		}
 		catch(FileNotFoundException e){
-
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		}
 		catch(IOException e){
-
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		}
 		catch(Exception e){
-
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		}
 
 	}
 
-	public static List<String> readAndDeleteLastKLinesText(int firstIndex,int lastIndex,String filename){
+	public static List<String> readAndDeleteLastKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
 		if(lastIndex!=numberOfLinesInFile){
 			System.err.println("LastIndex should be last line of file");
 			return null;
@@ -184,12 +218,13 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			file.close();
 			return textlist;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		} 
 	}
-	
-	public static List<String> readKLinesText(int firstIndex,int lastIndex,String filename){
+
+	public static List<String> readKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
 
 		try {
 			File target = new File(filename);
@@ -198,13 +233,14 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			file.close();
 			return textlist;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		} 
 	}
 
 
-	public static List<String> contructText(RandomAccessFile file, int firstIndex, int lastIndex){
+	public static List<String> contructText(RandomAccessFile file, int firstIndex, int lastIndex) throws InvalidOperation{
 		List<String> sb=new ArrayList<String>();
 		try {
 			for(int i=firstIndex;i<=lastIndex;i++){
@@ -213,8 +249,9 @@ public class FileOperationsHandler implements FileOperations.Iface {
 				sb.add(line);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		
 		}
 		return sb;
 	}
