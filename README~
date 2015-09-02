@@ -1,0 +1,20 @@
+Problem Statement :
+Have 2 thrift server instance running (on same machine), each having a file at
+their possession(passed as parameter).  Say a.txt and b.txt.  when a client makes a call to
+Server A, A should remove last 10 lines from a.txt and then pass it on
+to server B.  server B should prepend the incoming data to b.txt.
+
+client --------> Server A ------> Server B
+       <-----------|<----------------|
+
+also build a client to test it.
+
+
+How To Run in Eclipse :
+
+1) Import thriftProject into workspace
+2) Add the jar files provided to build path
+3) RUn Server.java - This creates 2 servers at port numbers 9090 and 9091
+4) Run Client.java 
+5) Observer files a.txt and b.txt. 
+6) Set constants in Constants.java to run a different experiment.

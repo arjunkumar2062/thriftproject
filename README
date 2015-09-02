@@ -10,4 +10,11 @@ client --------> Server A ------> Server B
 also build a client to test it.
 
 
+How To Run in Eclipse IDE:
 
+1) Import thriftProject into workspace
+2) Add the jar files provided to build path
+3) RUn Server.java - This creates 2 servers at port numbers 9090 and 9091
+4) Run Client.java 
+5) Observer files a.txt and b.txt. 
+6) Set constants in Constants.java to run a different experiment.
