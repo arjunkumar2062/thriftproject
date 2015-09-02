@@ -11,19 +11,79 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+
+import fileReaderWriter.FileOperations;
+import fileReaderWriter.InvalidOperation;
+import fileReaderWriter.Work;
+
 public class TestClass {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InvalidOperation, TException {
 		// TODO Auto-generated method stub
+		Work work=new Work();
+		work.filename=Constants.READFILE;
+		work.numOfLines=Constants.NUMOFLINES;
+		readText(work);
+	}
+
+	public static int numberOfLinesInFile=-1;
+	public static List<Integer> lineMemSize=new ArrayList<Integer>();
+
+	public static List<String> readText(Work work) throws InvalidOperation, TException {
 		try{
-			initialize(Constants.READFILE);
-			List<String> text=readKLinesText(1,2,Constants.READFILE);
-			String filename=Constants.WRITEFILE;
-			int numOfLines=3;
+			//writing to b.txt using serverB
+
+			String filename = work.filename;
+			int numOfLines=work.numOfLines;
+			initialize(filename);
+			//check if multiple reads need to if numOfLines is large
+			int cumByteSize=lineMemSize.get(numberOfLinesInFile);
+			int nextIndex=numberOfLinesInFile;
+			int linesInFile=numberOfLinesInFile;
+			for(int i=linesInFile;i>linesInFile-numOfLines;i--){
+				if( i==linesInFile-numOfLines+1 || 
+						(cumByteSize-lineMemSize.get(i)<=Constants.THRESHOLDMEMORY && cumByteSize-lineMemSize.get(i-1)>Constants.THRESHOLDMEMORY))
+				{
+
+					Work writeWork=new Work();
+					writeWork.text=readAndDeleteLastKLinesText(i,nextIndex,filename);
+					nextIndex=i-1;
+					cumByteSize=lineMemSize.get(numberOfLinesInFile);
+					writeWork.filename=Constants.WRITEFILE;
+					writeWork.numOfLines=nextIndex-i+1;
+					writeText(writeWork);
+					initialize(filename);
+
+				}
+			}
+			return work.text;
+		}
+		catch(TException e){
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
+		}
+		catch(Exception e){
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		
+		}
+	}
+
+	public static boolean writeText(Work work)throws InvalidOperation, TException {
+		try{
+			List<String> text=work.text;
+			String filename=work.filename;
+			int numOfLines=work.numOfLines;
 			initialize(filename);
 			//find size of text
 			int byteSize=findMemorySizeOfData(text);
-			
+
 			if(lineMemSize.get(numberOfLinesInFile)+byteSize<=Constants.THRESHOLDMEMORY){
 				File file = new File(filename);
 				if (!file.exists()) {
@@ -63,17 +123,21 @@ public class TestClass {
 				}
 				tempFile.renameTo(new File(filename));
 				bw.close();
+				return true;
 			}
 
 
 		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		}
+		catch(Exception e){
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		}
+		return false;
 
 	}
-
-	public static int numberOfLinesInFile=-1;
-	public static List<Integer> lineMemSize=new ArrayList<Integer>();
 
 	private static int findMemorySizeOfData(List<String> text) {
 		int numOfBytes=0;
@@ -84,7 +148,7 @@ public class TestClass {
 	}
 
 
-	private static void initialize(String filename){
+	private static void initialize(String filename) throws InvalidOperation{
 		System.out.println("Computing number of lines first time");
 		String sCurrentLine;
 		int numOfBytes=0;
@@ -104,21 +168,28 @@ public class TestClass {
 			numberOfLinesInFile=numOfLinesInFile;
 		}
 		catch(FileNotFoundException e){
-
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		}
 		catch(IOException e){
-
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		}
 		catch(Exception e){
-
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		}
 
 	}
 
-	public static List<String> readAndDeleteLastKLinesText(int firstIndex,int lastIndex,String filename){
+	public static List<String> readAndDeleteLastKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
 		if(lastIndex!=numberOfLinesInFile){
-			System.err.println("LastIndex should be last line of file");
-			return null;
+			InvalidOperation io = new InvalidOperation();
+			io.why = "LastIndex should be last line of file";
+			throw io;
 		}
 		try {
 			File target = new File(filename);
@@ -126,16 +197,19 @@ public class TestClass {
 			List<String> textlist=contructText(file,firstIndex,lastIndex);
 			numberOfLinesInFile=numberOfLinesInFile-lastIndex+firstIndex-1;
 			int reducedBytes=lineMemSize.get(lastIndex)-lineMemSize.get(firstIndex-1);
+			//concatenates list
+			lineMemSize.subList(firstIndex, lastIndex+1).clear();
 			file.setLength(target.length()-reducedBytes); 
 			file.close();
 			return textlist;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		} 
 	}
-	
-	public static List<String> readKLinesText(int firstIndex,int lastIndex,String filename){
+
+	public static List<String> readKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
 
 		try {
 			File target = new File(filename);
@@ -144,13 +218,14 @@ public class TestClass {
 			file.close();
 			return textlist;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;
 		} 
 	}
 
 
-	public static List<String> contructText(RandomAccessFile file, int firstIndex, int lastIndex){
+	public static List<String> contructText(RandomAccessFile file, int firstIndex, int lastIndex) throws InvalidOperation{
 		List<String> sb=new ArrayList<String>();
 		try {
 			for(int i=firstIndex;i<=lastIndex;i++){
@@ -159,14 +234,11 @@ public class TestClass {
 				sb.add(line);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			InvalidOperation io = new InvalidOperation();
+			io.why = e.getMessage();
+			throw io;		
 		}
 		return sb;
 	}
-
-
-
-
 
 }

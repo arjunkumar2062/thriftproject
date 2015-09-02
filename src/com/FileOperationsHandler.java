@@ -66,19 +66,37 @@ public class FileOperationsHandler implements FileOperations.Iface {
 	@Override
 	public List<String> readText(Work work) throws InvalidOperation, TException {
 		try{
-			String filename = work.filename;
-			int numOfLines=work.numOfLines;
-			initialize(filename);
-			work.text = readKLinesText(numberOfLinesInFile-numOfLines+1,numberOfLinesInFile,filename);
 			//writing to b.txt using serverB
 			TTransport transport;
 			transport = new TSocket("localhost", Constants.PORTB);
 			transport.open();
 			TProtocol protocol = new  TBinaryProtocol(transport);
 			FileOperations.Client client = new FileOperations.Client(protocol);
-			UtilityClient.write(client, work);
+			String filename = work.filename;
+			int numOfLines=work.numOfLines;
+			initialize(filename);
+			//check if multiple reads need to if numOfLines is large
+			int cumByteSize=lineMemSize.get(numberOfLinesInFile);
+			int nextIndex=numberOfLinesInFile;
+			int linesInFile=numberOfLinesInFile;
+			for(int i=linesInFile;i>linesInFile-numOfLines;--i){
+				if( i==linesInFile-numOfLines+1 || 
+						(cumByteSize-lineMemSize.get(i)<=Constants.THRESHOLDMEMORY && cumByteSize-lineMemSize.get(i-1)>Constants.THRESHOLDMEMORY))
+				{
+					Work writeWork=new Work();
+					writeWork.text=readAndDeleteLastKLinesText(i,nextIndex,filename);
+					nextIndex=i-1;
+					cumByteSize=lineMemSize.get(numberOfLinesInFile);
+					writeWork.filename=Constants.WRITEFILE;
+					writeWork.numOfLines=nextIndex-i+1;
+					
+					UtilityClient.write(client, writeWork);
+					initialize(filename);
+
+				}
+			}
 			transport.close();
-			return work.text;
+			return null;
 		}
 		catch(TException e){
 			InvalidOperation io = new InvalidOperation();
@@ -205,8 +223,9 @@ public class FileOperationsHandler implements FileOperations.Iface {
 
 	public static List<String> readAndDeleteLastKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
 		if(lastIndex!=numberOfLinesInFile){
-			System.err.println("LastIndex should be last line of file");
-			return null;
+			InvalidOperation io = new InvalidOperation();
+			io.why = "LastIndex should be last line of file";
+			throw io;
 		}
 		try {
 			File target = new File(filename);
@@ -214,6 +233,8 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			List<String> textlist=contructText(file,firstIndex,lastIndex);
 			numberOfLinesInFile=numberOfLinesInFile-lastIndex+firstIndex-1;
 			int reducedBytes=lineMemSize.get(lastIndex)-lineMemSize.get(firstIndex-1);
+			//concatenates list
+			lineMemSize.subList(firstIndex, lastIndex+1).clear();
 			file.setLength(target.length()-reducedBytes); 
 			file.close();
 			return textlist;

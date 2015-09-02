@@ -9,7 +9,7 @@ public class Constants {
 	public static final String TEMPFILE=FILEPATH+"/src/c.txt";
 	public static final int PORTA=9090;
 	public static final int PORTB=9091;
-	public static final int NUMOFLINES=5;
+	public static final int NUMOFLINES=12;
 	//number of characters that can be sent at a time.
 	public static final int THRESHOLDMEMORY=200; 
 												

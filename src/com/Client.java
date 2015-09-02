@@ -44,6 +44,9 @@ public class Client {
 		} catch (TException x) {
 			x.printStackTrace();
 		} 
+		catch(Exception e){
+			//System.out.println(e.getMessage());
+		}
 	}
 
 	
