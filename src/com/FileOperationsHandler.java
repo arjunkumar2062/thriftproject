@@ -47,6 +47,7 @@ import org.apache.thrift.transport.TTransport;
 
 
 
+
 /**
  * @author arjun
  *
@@ -56,8 +57,8 @@ import fileReaderWriter.*;
 public class FileOperationsHandler implements FileOperations.Iface {
 
 
-	public static int numberOfLinesInFile=-1;
-	public static List<Integer> lineMemSize=new ArrayList<Integer>();
+	public  int numberOfLinesInFile=-1;
+	public  List<Integer> lineMemSize=new ArrayList<Integer>();
 	@Override
 	public void ping() throws TException {
 		System.out.println("ping()");
@@ -79,20 +80,18 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			int cumByteSize=lineMemSize.get(numberOfLinesInFile);
 			int nextIndex=numberOfLinesInFile;
 			int linesInFile=numberOfLinesInFile;
-			for(int i=linesInFile;i>linesInFile-numOfLines;--i){
-				if( i==linesInFile-numOfLines+1 || 
+			for(int i=linesInFile;i>linesInFile-numOfLines && i>0;--i){
+				
+				if( i==linesInFile-numOfLines+1 || i==1 ||
 						(cumByteSize-lineMemSize.get(i)<=Constants.THRESHOLDMEMORY && cumByteSize-lineMemSize.get(i-1)>Constants.THRESHOLDMEMORY))
 				{
 					Work writeWork=new Work();
 					writeWork.text=readAndDeleteLastKLinesText(i,nextIndex,filename);
+					writeWork.numOfLines=nextIndex-i+1;
 					nextIndex=i-1;
 					cumByteSize=lineMemSize.get(numberOfLinesInFile);
 					writeWork.filename=Constants.WRITEFILE;
-					writeWork.numOfLines=nextIndex-i+1;
-					
 					UtilityClient.write(client, writeWork);
-					initialize(filename);
-
 				}
 			}
 			transport.close();
@@ -116,7 +115,8 @@ public class FileOperationsHandler implements FileOperations.Iface {
 			List<String> text=work.text;
 			String filename=work.filename;
 			int numOfLines=work.numOfLines;
-			initialize(filename);
+			if(numberOfLinesInFile==-1)
+				initialize(filename);
 			//find size of text
 			int byteSize=findMemorySizeOfData(text);
 
@@ -158,6 +158,7 @@ public class FileOperationsHandler implements FileOperations.Iface {
 					}
 				}
 				tempFile.renameTo(new File(filename));
+				reinitializeAfterWriting(work.text);
 				bw.close();
 				return true;
 			}
@@ -175,7 +176,26 @@ public class FileOperationsHandler implements FileOperations.Iface {
 
 	}
 
-	private static int findMemorySizeOfData(List<String> text) {
+	private void reinitializeAfterWriting(List<String> text) {
+		// TODO Auto-generated method stub
+		int numOfBytes=0;
+		int currentSize=lineMemSize.size();
+		lineMemSize.add(numOfBytes);
+		for (String line : text) {
+			numOfBytes=numOfBytes+line.getBytes().length+1;
+			lineMemSize.add(numOfBytes);
+		}
+		lineMemSize.remove(lineMemSize.size()-1);
+		
+		//update lineMemSize
+		for(int i=0;i<currentSize;i++){
+			lineMemSize.add(lineMemSize.get(i)+numOfBytes);
+		}
+		lineMemSize.subList(0, currentSize).clear();
+		numberOfLinesInFile=lineMemSize.size()-1;
+	}
+
+	private  int findMemorySizeOfData(List<String> text) {
 		int numOfBytes=0;
 		for (String sCurrentLine : text) {
 			numOfBytes=numOfBytes+sCurrentLine.getBytes().length+1;
@@ -184,7 +204,7 @@ public class FileOperationsHandler implements FileOperations.Iface {
 	}
 
 
-	private static void initialize(String filename) throws InvalidOperation{
+	private  void initialize(String filename) throws InvalidOperation{
 		System.out.println("Computing number of lines first time");
 		String sCurrentLine;
 		int numOfBytes=0;
@@ -221,7 +241,7 @@ public class FileOperationsHandler implements FileOperations.Iface {
 
 	}
 
-	public static List<String> readAndDeleteLastKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
+	public  List<String> readAndDeleteLastKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
 		if(lastIndex!=numberOfLinesInFile){
 			InvalidOperation io = new InvalidOperation();
 			io.why = "LastIndex should be last line of file";
@@ -245,7 +265,7 @@ public class FileOperationsHandler implements FileOperations.Iface {
 		} 
 	}
 
-	public static List<String> readKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
+	public  List<String> readKLinesText(int firstIndex,int lastIndex,String filename) throws InvalidOperation{
 
 		try {
 			File target = new File(filename);
@@ -261,7 +281,7 @@ public class FileOperationsHandler implements FileOperations.Iface {
 	}
 
 
-	public static List<String> contructText(RandomAccessFile file, int firstIndex, int lastIndex) throws InvalidOperation{
+	public  List<String> contructText(RandomAccessFile file, int firstIndex, int lastIndex) throws InvalidOperation{
 		List<String> sb=new ArrayList<String>();
 		try {
 			for(int i=firstIndex;i<=lastIndex;i++){

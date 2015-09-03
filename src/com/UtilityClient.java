@@ -25,7 +25,7 @@ public class UtilityClient {
 			System.out.println("Invalid operation: " + io.why);
 		}
 		catch(Exception e){
-			//System.out.println(e.getMessage());
+			System.out.println(e.getMessage());
 		}
 		return null;
 
@@ -38,12 +38,14 @@ public class UtilityClient {
 
 		try {
 			//write text into other file
-			return client.writeText(work);
+			boolean success=client.writeText(work);
+			System.out.println(success);
+			return success;
 		} catch (InvalidOperation io) {
 			System.out.println("Invalid operation: " + io.why);
 		}
 		catch(Exception e){
-			//System.out.println(e.getMessage());
+			System.out.println(e.getMessage());
 		}
 		return false;
 
